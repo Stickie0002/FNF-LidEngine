@@ -20,24 +20,25 @@ class Highscore
 	}
 
 	public static function saveScore(song:String, score:Int = 0, ?diff:Int = 0, ?rating:Float = -1):Void
-	{
-		if(song == null) return;
-		var daSong:String = formatSong(song, diff);
+    {
+        var daSong:String = formatSong(song, diff);
+        
+        // --- THE ALWAYS PERFECT MOD ---
+        if(ClientPrefs.data.alwaysPerfect) {
+            rating = 1; // 1 means 100%
+        }
 
-		if (songScores.exists(daSong))
-		{
-			if (songScores.get(daSong) < score)
-			{
-				setScore(daSong, score);
-				if(rating >= 0) setRating(daSong, rating);
-			}
-		}
-		else
-		{
-			setScore(daSong, score);
-			if(rating >= 0) setRating(daSong, rating);
-		}
-	}
+        if (songScores.exists(daSong)) {
+            if (songScores.get(daSong) < score) {
+                setScore(daSong, score);
+                if(rating >= 0) setRating(daSong, rating);
+            }
+        }
+        else {
+            setScore(daSong, score);
+            if(rating >= 0) setRating(daSong, rating);
+        }
+    }
 
 	public static function saveWeekScore(week:String, score:Int = 0, ?diff:Int = 0):Void
 	{
@@ -48,7 +49,8 @@ class Highscore
 			if (weekScores.get(daWeek) < score)
 				setWeekScore(daWeek, score);
 		}
-		else setWeekScore(daWeek, score);
+		else
+			setWeekScore(daWeek, score);
 	}
 
 	/**
@@ -92,13 +94,16 @@ class Highscore
 	}
 
 	public static function getRating(song:String, diff:Int):Float
-	{
-		var daSong:String = formatSong(song, diff);
-		if (!songRating.exists(daSong))
-			setRating(daSong, 0);
+    {
+        // If the cheat is on, always return 100% (1.0)
+        if(ClientPrefs.data.alwaysPerfect) return 1;
 
-		return songRating.get(daSong);
-	}
+        var daSong:String = formatSong(song, diff);
+        if (!songRating.exists(daSong))
+            setRating(daSong, 0);
+
+        return songRating.get(daSong);
+    }
 
 	public static function getWeekScore(week:String, diff:Int):Int
 	{
@@ -112,12 +117,16 @@ class Highscore
 	public static function load():Void
 	{
 		if (FlxG.save.data.weekScores != null)
+		{
 			weekScores = FlxG.save.data.weekScores;
-
+		}
 		if (FlxG.save.data.songScores != null)
+		{
 			songScores = FlxG.save.data.songScores;
-
+		}
 		if (FlxG.save.data.songRating != null)
+		{
 			songRating = FlxG.save.data.songRating;
+		}
 	}
 }

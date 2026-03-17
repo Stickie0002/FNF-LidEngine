@@ -1,78 +1,63 @@
 package backend;
 
-import flixel.util.FlxGradient;
+import flixel.FlxSprite;
+import flixel.util.FlxColor;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
 
 class CustomFadeTransition extends MusicBeatSubstate {
-	public static var finishCallback:Void->Void;
-	var isTransIn:Bool = false;
-	var transBlack:FlxSprite;
-	var transGradient:FlxSprite;
+    public static var finishCallback:Void->Void;
+    var isTransIn:Bool = false;
+    var duration:Float = 0.6;
+    var overlay:FlxSprite;
 
-	var duration:Float;
-	public function new(duration:Float, isTransIn:Bool)
-	{
-		this.duration = duration;
-		this.isTransIn = isTransIn;
-		super();
-	}
+    public function new(duration:Float, isTransIn:Bool) {
+        this.isTransIn = isTransIn;
+        this.duration = duration;
+        super();
+    }
 
-	override function create()
-	{
-		cameras = [FlxG.cameras.list[FlxG.cameras.list.length-1]];
-		var width:Int = Std.int(FlxG.width / Math.max(camera.zoom, 0.001));
-		var height:Int = Std.int(FlxG.height / Math.max(camera.zoom, 0.001));
-		transGradient = FlxGradient.createGradientFlxSprite(1, height, (isTransIn ? [0x0, FlxColor.BLACK] : [FlxColor.BLACK, 0x0]));
-		transGradient.scale.x = width;
-		transGradient.updateHitbox();
-		transGradient.scrollFactor.set();
-		transGradient.screenCenter(X);
-		add(transGradient);
+    override function create() {
+        // Ensure this substate uses its own camera or stays on top
+        var cam = FlxG.cameras.list[FlxG.cameras.list.length - 1];
+        cameras = [cam];
 
-		transBlack = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
-		transBlack.scale.set(width, height + 400);
-		transBlack.updateHitbox();
-		transBlack.scrollFactor.set();
-		transBlack.screenCenter(X);
-		add(transBlack);
+        // 1. Create the Black Overlay
+        overlay = new FlxSprite().makeGraphic(FlxG.width * 2, FlxG.height * 2, FlxColor.BLACK);
+        overlay.screenCenter();
+        overlay.scrollFactor.set(); // Stop the overlay from moving with the camera!
+        add(overlay);
 
-		if(isTransIn)
-			transGradient.y = transBlack.y - transBlack.height;
-		else
-			transGradient.y = -transGradient.height;
+        if (isTransIn) {
+            // TRANSITION IN (Revealing the state)
+            overlay.alpha = 1;
+            FlxG.camera.zoom = 5.0; // Start really zoomed in
 
-		super.create();
-	}
+            // Fade Out Alpha (1.0 -> 0.0)
+            FlxTween.tween(overlay, {alpha: 0}, duration, {ease: FlxEase.expoOut});
+            // Zoom Out Camera (5.0 -> 1.0)
+            FlxTween.tween(FlxG.camera, {zoom: 1.0}, duration, {
+                ease: FlxEase.expoOut,
+                onComplete: function(twn:FlxTween) {
+                    close();
+                }
+            });
+        } else {
+            // TRANSITION OUT (Covering the state)
+            overlay.alpha = 0;
+            FlxG.camera.zoom = 1.0; // Start at normal zoom
 
-	override function update(elapsed:Float) {
-		super.update(elapsed);
+            // Fade In Alpha (0.0 -> 1.0)
+            FlxTween.tween(overlay, {alpha: 1}, duration, {ease: FlxEase.expoIn});
+            // Zoom In Camera (1.0 -> 5.0)
+            FlxTween.tween(FlxG.camera, {zoom: 5.0}, duration, {
+                ease: FlxEase.expoIn,
+                onComplete: function(twn:FlxTween) {
+                    if (finishCallback != null) finishCallback();
+                }
+            });
+        }
 
-		final height:Float = FlxG.height * Math.max(camera.zoom, 0.001);
-		final targetPos:Float = transGradient.height + 50 * Math.max(camera.zoom, 0.001);
-		if(duration > 0)
-			transGradient.y += (height + targetPos) * elapsed / duration;
-		else
-			transGradient.y = (targetPos) * elapsed;
-
-		if(isTransIn)
-			transBlack.y = transGradient.y + transGradient.height;
-		else
-			transBlack.y = transGradient.y - transBlack.height;
-
-		if(transGradient.y >= targetPos)
-		{
-			close();
-		}
-	}
-
-	// Don't delete this
-	override function close():Void
-	{
-		super.close();
-
-		if(finishCallback != null)
-		{
-			finishCallback();
-			finishCallback = null;
-		}
-	}
+        super.create();
+    }
 }

@@ -1,49 +1,45 @@
 package states;
 
-class ErrorState extends MusicBeatState
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.FlxState;
+import flixel.text.FlxText;
+import flixel.util.FlxColor;
+
+class ErrorState extends FlxState
 {
-	public var acceptCallback:Void->Void;
-	public var backCallback:Void->Void;
-	public var errorMsg:String;
+    var errorMessage:String;
+    public function new(message:String)
+    {
+        super();
+        this.errorMessage = message;
+    }
 
-	public function new(error:String, accept:Void->Void = null, back:Void->Void = null)
-	{
-		this.errorMsg = error;
-		this.acceptCallback = accept;
-		this.backCallback = back;
+    override public function create()
+    {
+        super.create();
+        
+        var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+        bg.alpha = 0.6;
+        add(bg);
 
-		super();
-	}
+        var title:FlxText = new FlxText(0, 100, FlxG.width, "LID ENGINE CRASHED!", 64);
+        title.setFormat(Paths.font("vcr.ttf"), 64, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
+        add(title);
 
-	public var errorSine:Float = 0;
-	public var errorText:FlxText;
-	override function create()
-	{
-		var bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
-		bg.color = FlxColor.GRAY;
-		bg.antialiasing = ClientPrefs.data.antialiasing;
-		add(bg);
-		bg.screenCenter();
+        var errorTxt:FlxText = new FlxText(50, 250, FlxG.width - 100, errorMessage, 24);
+        errorTxt.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.YELLOW, CENTER, OUTLINE, FlxColor.BLACK);
+        add(errorTxt);
 
-		errorText = new FlxText(0, 0, FlxG.width - 300, errorMsg, 32);
-		errorText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		errorText.scrollFactor.set();
-		errorText.borderSize = 2;
-		errorText.screenCenter();
-		add(errorText);
-		super.create();
-	}
+        var tip:FlxText = new FlxText(0, FlxG.height - 100, FlxG.width, "Press ESCAPE to return to Main Menu", 32);
+        tip.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
+        add(tip);
+    }
 
-	override function update(elapsed:Float)
-	{
-		errorSine += 180 * elapsed;
-		errorText.alpha = 1 - Math.sin((Math.PI * errorSine) / 180);
-
-		if(controls.ACCEPT && acceptCallback != null)
-			acceptCallback();
-		else if(controls.BACK && backCallback != null)
-			backCallback();
-
-		super.update(elapsed);
-	}
+    override public function update(elapsed:Float)
+    {
+        if (FlxG.keys.justPressed.ESCAPE)
+            MusicBeatState.switchState(new MainMenuState());
+        super.update(elapsed);
+    }
 }

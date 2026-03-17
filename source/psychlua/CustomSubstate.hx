@@ -31,6 +31,8 @@ class CustomSubstate extends MusicBeatSubstate
 			}
 		}
 		PlayState.instance.openSubState(new CustomSubstate(name));
+		PlayState.instance.setOnHScript('customSubstate', instance);
+		PlayState.instance.setOnHScript('customSubstateName', name);
 	}
 
 	public static function closeCustomSubstate()
@@ -38,6 +40,7 @@ class CustomSubstate extends MusicBeatSubstate
 		if(instance != null)
 		{
 			PlayState.instance.closeSubState();
+			instance = null;
 			return true;
 		}
 		return false;
@@ -47,7 +50,8 @@ class CustomSubstate extends MusicBeatSubstate
 	{
 		if(instance != null)
 		{
-			var tagObject:FlxObject = cast (MusicBeatState.getVariables().get(tag), FlxObject);
+			var tagObject:FlxObject = cast (PlayState.instance.variables.get(tag), FlxObject);
+			#if LUA_ALLOWED if(tagObject == null) tagObject = cast (PlayState.instance.modchartSprites.get(tag), FlxObject); #end
 
 			if(tagObject != null)
 			{
@@ -62,8 +66,6 @@ class CustomSubstate extends MusicBeatSubstate
 	override function create()
 	{
 		instance = this;
-		PlayState.instance.setOnHScript('customSubstate', instance);
-
 
 		PlayState.instance.callOnScripts('onCustomSubstateCreate', [name]);
 		super.create();
@@ -73,7 +75,6 @@ class CustomSubstate extends MusicBeatSubstate
 	public function new(name:String)
 	{
 		CustomSubstate.name = name;
-		PlayState.instance.setOnHScript('customSubstateName', name);
 		super();
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 	}
@@ -88,7 +89,6 @@ class CustomSubstate extends MusicBeatSubstate
 	override function destroy()
 	{
 		PlayState.instance.callOnScripts('onCustomSubstateDestroy', [name]);
-		instance = null;
 		name = 'unnamed';
 
 		PlayState.instance.setOnHScript('customSubstate', null);

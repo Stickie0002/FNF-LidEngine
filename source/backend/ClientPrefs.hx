@@ -20,11 +20,16 @@ import states.TitleState;
 	public var splashAlpha:Float = 0.6;
 	public var lowQuality:Bool = false;
 	public var shaders:Bool = true;
-	public var cacheOnGPU:Bool = #if !switch false #else true #end; // GPU Caching made by Raltyro
+	public var cacheOnGPU:Bool = #if !switch false #else true #end; //From Stilic
 	public var framerate:Int = 60;
 	public var camZooms:Bool = true;
 	public var hideHud:Bool = false;
 	public var noteOffset:Int = 0;
+	public var alwaysPerfect:Bool = false; // This is the default value
+	public var godMode:Bool = false;
+	public var lidWatermark:Bool = true; // Default to true so people see your brand!
+	public var menuMusic:String = 'Classic';
+	public var menuSong:String = 'Default';
 	public var arrowRGB:Array<Array<FlxColor>> = [
 		[0xFFC24B99, 0xFFFFFFFF, 0xFF3C1F56],
 		[0xFF00FFFF, 0xFFFFFFFF, 0xFF1542B7],
@@ -69,19 +74,17 @@ import states.TitleState;
 
 	public var comboOffset:Array<Int> = [0, 0, 0, 0];
 	public var ratingOffset:Int = 0;
-	public var sickWindow:Float = 45.0;
-	public var goodWindow:Float = 90.0;
-	public var badWindow:Float = 135.0;
-	public var safeFrames:Float = 10.0;
+	public var sickWindow:Int = 45;
+	public var goodWindow:Int = 90;
+	public var badWindow:Int = 135;
+	public var safeFrames:Float = 10;
 	public var guitarHeroSustains:Bool = true;
 	public var discordRPC:Bool = true;
-	public var loadingScreen:Bool = true;
-	public var language:String = 'en-US';
 }
 
 class ClientPrefs {
-	public static var data:SaveVariables = {};
-	public static var defaultData:SaveVariables = {};
+    public static var data:SaveVariables = {};
+    public static var defaultData:SaveVariables = {}; // Keep this empty, @:structInit fills it!
 
 	//Every key has two binds, add your key bind down here and then add your control on options/ControlsSubState.hx and Controls.hx
 	public static var keyBinds:Map<String, Array<FlxKey>> = [
@@ -213,7 +216,9 @@ class ClientPrefs {
 		if (FlxG.save.data.mute != null)
 			FlxG.sound.muted = FlxG.save.data.mute;
 
-		#if DISCORD_ALLOWED DiscordClient.check(); #end
+		#if DISCORD_ALLOWED
+		DiscordClient.check();
+		#end
 
 		// controls on a separate save file
 		var save:FlxSave = new FlxSave();
@@ -251,9 +256,8 @@ class ClientPrefs {
 	}
 	public static function toggleVolumeKeys(?turnOn:Bool = true)
 	{
-		final emptyArray = [];
-		FlxG.sound.muteKeys = turnOn ? TitleState.muteKeys : emptyArray;
-		FlxG.sound.volumeDownKeys = turnOn ? TitleState.volumeDownKeys : emptyArray;
-		FlxG.sound.volumeUpKeys = turnOn ? TitleState.volumeUpKeys : emptyArray;
+		FlxG.sound.muteKeys = turnOn ? TitleState.muteKeys : [];
+		FlxG.sound.volumeDownKeys = turnOn ? TitleState.volumeDownKeys : [];
+		FlxG.sound.volumeUpKeys = turnOn ? TitleState.volumeUpKeys : [];
 	}
 }
