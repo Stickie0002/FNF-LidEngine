@@ -14,7 +14,7 @@ My Plans:
 4. Something :/
 5. Finishing Stage Editor (if i can)
 6. Maybe adding Shader Editor Or Menu Editor (If you want)
-7. Adding Modhcart Support To PlayState.hx
+7. Adding Modchart Support To PlayState.hx
 
 Thats It!
 
