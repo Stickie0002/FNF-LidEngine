@@ -1,3 +1,35 @@
+# Friday Night Funkin' - Lid Engine
+Engine Where you can just basically create mods :D But not normal ones but i will add more tools for easier modding :)
+
+## Info:
+
+For First this engine was been for spamming Charts Engine, but later i thought if i turn this Engine into a Unique Modding Engine!
+
+## Plans:
+
+My Plans:
+1. Adding Custom Modchart Editor Menu
+2. Improving Gameplay
+3. Adding More Tools To Chart Editor (Lid Tools)
+4. Something :/
+5. Finishing Stage Editor (if i can)
+6. Maybe adding Shader Editor Or Menu Editor (If you want)
+7. Adding Modhcart Support To PlayState.hx
+
+Thats It!
+
+## Future Updates:
+
+Check The Plans again and youll know
+
+## Support End Date?:
+
+Actually Dont know, but i guess 2027-2028 My Bet
+
+## End
+
+So This was all info i wanted to type here so go check the Psych Engine Description because Lid Engine is Based Of Psych Engine so Yeap :)
+
 # Friday Night Funkin' - Psych Engine
 Engine originally used on [Mind Games Mod](https://gamebanana.com/mods/301107), intended to be a fix for the vanilla version's many issues while keeping the casual play aspect of it. Also aiming to be an easier alternative to newbie coders.
 
