@@ -1,5 +1,6 @@
-package backend;
+package backend; // This fixes the 'package states.editors' error
 
+import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxTween;
@@ -8,56 +9,41 @@ import flixel.tweens.FlxEase;
 class CustomFadeTransition extends MusicBeatSubstate {
     public static var finishCallback:Void->Void;
     var isTransIn:Bool = false;
-    var duration:Float = 0.6;
-    var overlay:FlxSprite;
+    var transBlack:FlxSprite;
 
     public function new(duration:Float, isTransIn:Bool) {
-        this.isTransIn = isTransIn;
-        this.duration = duration;
         super();
-    }
+        this.isTransIn = isTransIn;
 
-    override function create() {
-        // Ensure this substate uses its own camera or stays on top
-        var cam = FlxG.cameras.list[FlxG.cameras.list.length - 1];
-        cameras = [cam];
+        // Create a black bar that is slightly taller than the screen for a clean sweep
+        transBlack = new FlxSprite().makeGraphic(FlxG.width, FlxG.height + 400, FlxColor.BLACK);
+        transBlack.scrollFactor.set();
+        transBlack.screenCenter(X);
+        add(transBlack);
 
-        // 1. Create the Black Overlay
-        overlay = new FlxSprite().makeGraphic(FlxG.width * 2, FlxG.height * 2, FlxColor.BLACK);
-        overlay.screenCenter();
-        overlay.scrollFactor.set(); // Stop the overlay from moving with the camera!
-        add(overlay);
-
-        if (isTransIn) {
-            // TRANSITION IN (Revealing the state)
-            overlay.alpha = 1;
-            FlxG.camera.zoom = 5.0; // Start really zoomed in
-
-            // Fade Out Alpha (1.0 -> 0.0)
-            FlxTween.tween(overlay, {alpha: 0}, duration, {ease: FlxEase.expoOut});
-            // Zoom Out Camera (5.0 -> 1.0)
-            FlxTween.tween(FlxG.camera, {zoom: 1.0}, duration, {
-                ease: FlxEase.expoOut,
+        if(!isTransIn) {
+            // SLIDE DOWN: Transitioning out of the current state
+            transBlack.y = -transBlack.height;
+            FlxTween.tween(transBlack, {y: 0}, duration, {
+                ease: FlxEase.expoInOut,
+                onComplete: function(twn:FlxTween) {
+                    if(finishCallback != null) finishCallback();
+                }
+            });
+        } else {
+            // SLIDE DOWN FURTHER: Transitioning into the new state
+            transBlack.y = 0;
+            FlxTween.tween(transBlack, {y: transBlack.height}, duration, {
+                ease: FlxEase.expoInOut,
                 onComplete: function(twn:FlxTween) {
                     close();
                 }
             });
-        } else {
-            // TRANSITION OUT (Covering the state)
-            overlay.alpha = 0;
-            FlxG.camera.zoom = 1.0; // Start at normal zoom
-
-            // Fade In Alpha (0.0 -> 1.0)
-            FlxTween.tween(overlay, {alpha: 1}, duration, {ease: FlxEase.expoIn});
-            // Zoom In Camera (1.0 -> 5.0)
-            FlxTween.tween(FlxG.camera, {zoom: 5.0}, duration, {
-                ease: FlxEase.expoIn,
-                onComplete: function(twn:FlxTween) {
-                    if (finishCallback != null) finishCallback();
-                }
-            });
         }
+    }
 
-        super.create();
+    override function destroy() {
+        if(finishCallback != null) finishCallback();
+        super.destroy();
     }
 }
